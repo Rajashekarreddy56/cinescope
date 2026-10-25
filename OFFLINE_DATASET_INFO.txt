@@ -1,0 +1,10 @@
+CineScope Offline Dataset Mode
+
+This build includes 45 curated movie records for offline demonstrations across Tollywood (Telugu), Bollywood (Hindi), and Hollywood (English). The records contain titles, release dates, genres, and short descriptions. Ratings, posters, budgets, and revenue are intentionally blank rather than fabricated.
+
+This is a small curated demonstration catalogue, not a comprehensive or automatically updated database. For a larger dataset, review licensing and source details before downloading and redistributing data. Possible starting points:
+- Indian cinema dataset (Kaggle community post): https://www.kaggle.com/general/231149
+- Bollywood Movie List (Zenodo): https://zenodo.org/records/14014453
+- Global TMDB raw dataset (Zenodo): https://zenodo.org/records/21920642
+
+Live data is not enabled in this offline-first build unless TMDB credentials are configured. The app can run without an API key or external API access.
