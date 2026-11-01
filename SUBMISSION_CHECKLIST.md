@@ -15,14 +15,21 @@
 - Test all three industry filters, title search, recommendations, box-office charts, and CSV export.
 
 ## Data integrity note
-Offline catalogue titles are demonstration records. Ratings and posters are left blank where unavailable. Offline box-office figures are **synthetic illustrative examples only** so the charts and ROI calculations can be demonstrated; do not present them as actual box-office results. For factual financial analysis, replace them with sourced values and record the source/date for each figure.
+When `data/movies.sqlite3` is installed, CineScope uses the local 215,288-record catalogue. If it is unavailable, the app clearly falls back to 45 curated sample records. Missing ratings, posters, budgets, and revenue are not invented. Financial analysis uses only source rows with reported budget and revenue.
 
 ## Before submission
 - Add student name, roll number, class, guide/faculty, and institution details to your report.
 - Capture screenshots of the homepage, each industry filter, recommendations, dataset explorer, and box-office analysis.
 - Explain ROI: `(Revenue - Budget) / Budget × 100`. Note that this simple ratio excludes marketing, distribution shares, taxes, and other costs.
 - Describe the current offline version honestly: it does not fetch new titles automatically.
-<<<<<<< HEAD
+
+## Render deployment verification
+
+- [ ] Confirm the Render service is Free and its Root Directory is blank.
+- [ ] Confirm the build command is `pip install -r requirements-web.txt` and the start command binds Gunicorn to `$PORT`.
+- [ ] Confirm `/health` returns HTTP 200 without querying SQLite.
+- [ ] If deploying the full dataset, configure a private HTTPS artifact URL and use the build step in `WEB_DEPLOY_GUIDE.md`; do not commit the database.
+- [ ] Confirm `/api/status` reports the expected dataset record count after deployment.
 
 
 ## PWA verification
@@ -36,5 +43,3 @@ Offline catalogue titles are demonstration records. Ratings and posters are left
 - [ ] Confirm uncached requests show a clear unavailable state rather than invented content.
 - [ ] Restore connectivity and confirm the online indicator returns and data can refresh.
 - [ ] Deploy a new version and verify the update prompt activates the waiting worker.
-=======
->>>>>>> origin/main

@@ -20,7 +20,6 @@
   let toastTimer;
   function toast(message) { const el = $('#toast'); el.textContent = message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600); }
   function showNotice(message, type = '') { const el = $('#global-notice'); if (!message) { el.classList.add('hidden'); return; } el.textContent = message; el.className = 'notice' + (type ? ' ' + type : ''); }
-<<<<<<< HEAD
   function setStatus(live, text) { const dot = $('.status-dot'); dot.classList.toggle('demo', !live); $('#data-status').textContent = text || (live ? 'Local dataset' : 'Dataset not installed'); }
   function fallbackPoster(movie) { return `<div class="poster-fallback"><span class="fallback-mark">▶</span><span>${esc(movie.industry || 'Cinema')}</span><strong>${esc(movie.title || 'Movie')}</strong></div>`; }
   function renderCard(movie) {
@@ -29,16 +28,6 @@
     const rating = movie.vote_average != null && Number(movie.vote_average) > 0 ? Number(movie.vote_average).toFixed(1) : 'N/A';
     const genre = (movie.genre_names || []).slice(0, 2).map((g) => `<span class="genre-pill">${esc(g)}</span>`).join('');
     return `<article class="movie-card" tabindex="0" role="button" data-movie-id="${esc(movie.id)}" aria-label="View details for ${esc(movie.title)}"><div class="poster-wrap">${img}<span class="industry-badge">${esc(movie.industry || 'Cinema')}</span><span class="rating-badge">${rating === 'N/A' ? 'SAMPLE' : '★ ' + rating}</span></div><div class="movie-meta"><h4 class="movie-title" title="${esc(movie.title)}">${esc(movie.title)}</h4><div class="movie-subtitle"><span>${esc(movie.year || (movie.release_date || '').slice(0, 4) || 'Year N/A')}</span><span>${esc((movie.genre_names || [])[0] || 'Movie')}</span></div><div class="genre-pills">${genre}</div></div></article>`;
-=======
-  function setStatus(live, text) { const dot = $('.status-dot'); dot.classList.toggle('demo', !live); $('#data-status').textContent = text || (live ? 'TMDB live data' : 'Offline sample mode'); }
-  function fallbackPoster(movie) { return `<div class="poster-fallback"><span class="fallback-mark">▶</span><span>${esc(movie.industry || 'Cinema')}</span><strong>${esc(movie.title || 'Movie')}</strong></div>`; }
-  function renderCard(movie) {
-    const poster = movie.poster_url || (movie.poster_path && String(movie.poster_path).startsWith('/') ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '');
-    const img = poster ? `<img loading="lazy" src="${esc(poster)}" alt="${esc(movie.title)} poster">` : fallbackPoster(movie);
-    const rating = movie.vote_average != null && Number(movie.vote_average) > 0 ? Number(movie.vote_average).toFixed(1) : 'DEMO';
-    const genre = (movie.genre_names || []).slice(0, 2).map((g) => `<span class="genre-pill">${esc(g)}</span>`).join('');
-    return `<article class="movie-card" tabindex="0" role="button" data-movie-id="${esc(movie.id)}" aria-label="View details for ${esc(movie.title)}"><div class="poster-wrap">${img}<span class="industry-badge">${esc(movie.industry || 'Cinema')}</span><span class="rating-badge">${rating === 'DEMO' ? 'SAMPLE' : '★ ' + rating}</span></div><div class="movie-meta"><h4 class="movie-title" title="${esc(movie.title)}">${esc(movie.title)}</h4><div class="movie-subtitle"><span>${esc(movie.year || (movie.release_date || '').slice(0, 4) || 'Year N/A')}</span><span>${esc((movie.genre_names || [])[0] || 'Movie')}</span></div><div class="genre-pills">${genre}</div></div></article>`;
->>>>>>> origin/main
   }
   function bindMovieCards(containerSelector) {
     $$(containerSelector + ' img').forEach((img) => {
@@ -65,26 +54,16 @@
     if (!append) grid.innerHTML = '';
     if (movies.length) grid.insertAdjacentHTML('beforeend', movies.map(renderCard).join(''));
     bindMovieCards('#movie-grid');
-<<<<<<< HEAD
     $('#results-count').textContent = `${state.query ? 'Search results' : 'Showing'} ${state.movies.length} title${state.movies.length === 1 ? '' : 's'}${state.live ? ' · Local dataset' : ' · offline samples'}`;
-=======
-    $('#results-count').textContent = `${state.query ? 'Search results' : 'Showing'} ${state.movies.length} title${state.movies.length === 1 ? '' : 's'}${state.live ? ' · live metadata' : ' · offline samples'}`;
->>>>>>> origin/main
     updateStats(); populateRecommendationSelect(); renderDatasetTable();
   }
   function updateStats() {
     $('#stat-count').textContent = fmtNum(state.movies.length);
     const ratings = state.movies.map(m => Number(m.vote_average)).filter(n => Number.isFinite(n) && n > 0);
     $('#stat-rating').textContent = ratings.length ? (ratings.reduce((a,b) => a+b, 0) / ratings.length).toFixed(1) + '/10' : 'N/A';
-<<<<<<< HEAD
     $('#stat-boxoffice').textContent = state.live ? 'Check dataset fields' : 'Not available';
     $('#results-title').textContent = state.query ? `Search: “${state.query}”` : CATEGORIES[state.category];
     $('#section-subtitle').textContent = `${INDUSTRIES[state.industry]} · ${state.live ? 'Downloaded movie metadata' : 'Install the downloadable movie dataset to enable the full catalogue'}.`;
-=======
-    $('#stat-boxoffice').textContent = state.live ? 'API values' : 'Demo mode';
-    $('#results-title').textContent = state.query ? `Search: “${state.query}”` : CATEGORIES[state.category];
-    $('#section-subtitle').textContent = `${INDUSTRIES[state.industry]} · ${state.live ? 'Current movie metadata from TMDB' : 'Sample titles until API credentials are configured'}.`;
->>>>>>> origin/main
   }
   async function fetchMovies({ append = false, refresh = false } = {}) {
     if (state.loading) return;
@@ -101,16 +80,11 @@
       state.live = Boolean(payload.live);
       state.movies = append ? state.movies.concat(movies) : movies;
       if (!append) state.movies = movies;
-<<<<<<< HEAD
       setStatus(state.live, state.live ? 'Local dataset' : 'Dataset not installed');
-=======
-      setStatus(state.live, state.live ? 'TMDB live data' : 'Offline sample mode');
->>>>>>> origin/main
       showNotice(payload.warning || payload.notice || '', payload.warning ? 'error' : '');
       renderMovies(movies, append);
       $('#load-more').classList.toggle('hidden', !state.live || state.page >= (payload.total_pages || 1) || movies.length === 0);
     } catch (error) {
-<<<<<<< HEAD
       // If this exact filter was never cached, keep the last saved catalogue useful offline.
       const saved = state.movies.filter((movie) => {
         const industryMatch = state.industry === 'all' || String(movie.industry || '').toLowerCase() === state.industry;
@@ -129,24 +103,13 @@
         $('#empty-state').classList.remove('hidden');
         $('#results-count').textContent = 'No saved results for this selection';
       }
-=======
-      showNotice(`Unable to fetch movies: ${error.message}`, 'error');
-      $('#movie-grid').innerHTML = '';
-      $('#empty-state').classList.remove('hidden');
-      $('#results-count').textContent = 'Could not load records';
->>>>>>> origin/main
     } finally { state.loading = false; }
   }
   async function fetchStatus() {
     try {
       const response = await fetch('/api/status'); const data = await response.json();
-<<<<<<< HEAD
       setStatus(data.live, data.live ? 'Local dataset' : 'Dataset not installed');
       if (!data.live) showNotice('You are viewing the offline sample. To enable live movie search, metadata and dataset ratings, run py scripts/download_dataset.py to install the large local movie catalogue. No movie API key is required.');
-=======
-      setStatus(data.live, data.live ? 'TMDB live data' : 'Offline sample mode');
-      if (!data.live) showNotice('You are viewing the offline sample. To enable current TMDB posters, ratings, search and available financial details, add your TMDB API Read Access Token to the .env file. This demo does not fabricate box-office values.');
->>>>>>> origin/main
     } catch (_) { setStatus(false, 'Local website'); }
   }
   function activateView(view) {
@@ -193,7 +156,6 @@
     if (!movies.length) { body.innerHTML = '<tr><td colspan="6">No financial records are available for this selection.</td></tr>'; return; }
     body.innerHTML = movies.map(m => `<tr><td>${esc(m.title)}</td><td>${esc(m.industry || 'International')}</td><td>${fmtMoney(m.budget)}</td><td>${fmtMoney(m.revenue)}</td><td>${m.profit != null ? fmtMoney(m.profit) : '—'}</td><td>${m.roi != null && Number.isFinite(Number(m.roi)) ? Number(m.roi).toFixed(1)+'%' : '—'}</td></tr>`).join('');
   }
-<<<<<<< HEAD
   function populateRecommendationSelect(extraMovie = null) {
     const select = $('#recommend-source'); const selected = select.value;
     const uniq = new Map(); [...state.movies, ...state.boxOffice, ...(extraMovie ? [extraMovie] : [])].forEach(m => { if (m.id != null) uniq.set(String(m.id), m); });
@@ -202,15 +164,6 @@
     select.innerHTML = items.map(m => `<option value="${esc(m.id)}">${esc(m.title)} · ${esc(m.industry || 'Cinema')}</option>`).join('');
     const preferred = extraMovie ? String(extraMovie.id) : selected;
     if ([...select.options].some(o => o.value === preferred)) select.value = preferred;
-=======
-  function populateRecommendationSelect() {
-    const select = $('#recommend-source'); const selected = select.value;
-    const uniq = new Map(); [...state.movies, ...state.boxOffice].forEach(m => { if (m.id != null) uniq.set(String(m.id), m); });
-    const items = [...uniq.values()];
-    if (!items.length) { select.innerHTML = '<option value="">No movies loaded</option>'; return; }
-    select.innerHTML = items.map(m => `<option value="${esc(m.id)}">${esc(m.title)} · ${esc(m.industry || 'Cinema')}</option>`).join('');
-    if ([...select.options].some(o => o.value === selected)) select.value = selected;
->>>>>>> origin/main
   }
   async function runRecommendations() {
     const id = $('#recommend-source').value;
@@ -218,7 +171,6 @@
     $('#recommend-count').textContent = 'Finding related titles…'; $('#recommend-grid').innerHTML = '<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>';
     try {
       const response = await fetch(`/api/movie/${encodeURIComponent(id)}/recommendations`); const payload = await response.json();
-<<<<<<< HEAD
       if (!response.ok) throw new Error(payload.error || 'Could not load recommendations');
       const movies = payload.results || [];
       $('#recommend-count').textContent = `${movies.length} recommendation${movies.length === 1 ? '' : 's'}${payload.live ? ' from local dataset' : ' in sample data'}`;
@@ -236,26 +188,13 @@
       $('#recommend-grid').innerHTML = local.length ? local.map(renderCard).join('') : `<div class="box-empty">No suitable saved recommendations are available. (${esc(error.message)})</div>`;
       bindMovieCards('#recommend-grid');
     }
-=======
-      const movies = payload.results || [];
-      $('#recommend-count').textContent = `${movies.length} recommendation${movies.length === 1 ? '' : 's'}${payload.live ? ' from TMDB' : ' in sample data'}`;
-      $('#recommend-grid').innerHTML = movies.length ? movies.map(renderCard).join('') : '<div class="box-empty">No recommendations are available. Configure live API credentials or choose another title.</div>';
-      bindMovieCards('#recommend-grid');
-    } catch (error) { $('#recommend-count').textContent = 'Recommendations unavailable'; $('#recommend-grid').innerHTML = `<div class="box-empty">${esc(error.message)}</div>`; }
->>>>>>> origin/main
   }
   function renderDatasetTable() {
     const body = $('#dataset-table-body'); const filter = ($('#table-search')?.value || '').toLowerCase();
     const list = state.movies.filter(m => !filter || [m.title,m.industry,m.year,m.original_language,(m.genre_names||[]).join(' ')].join(' ').toLowerCase().includes(filter));
-<<<<<<< HEAD
     if (!list.length) { body.innerHTML = '<tr><td colspan="6">No matching records.</td></tr>'; $('#dataset-caption').textContent = state.live ? 'Local downloaded movie metadata.' : 'Offline sample dataset; live ratings and financial values are not filled with fabricated values.'; return; }
     body.innerHTML = list.map(m => `<tr><td>${esc(m.title)}</td><td>${esc(m.industry || 'International')}</td><td>${esc(m.year || (m.release_date||'').slice(0,4) || '—')}</td><td>${esc(LANGUAGES[m.original_language] || m.original_language || '—')}</td><td>${esc((m.genre_names||[]).join(', ') || '—')}</td><td>${m.vote_average != null && Number(m.vote_average)>0 ? Number(m.vote_average).toFixed(1)+'/10' : '—'}</td></tr>`).join('');
     $('#dataset-caption').textContent = state.live ? `${state.movies.length} records received from local dataset. Language-based industry labels are approximate.` : `${state.movies.length} sample titles. Install the full dataset for the complete catalogue.`;
-=======
-    if (!list.length) { body.innerHTML = '<tr><td colspan="6">No matching records.</td></tr>'; $('#dataset-caption').textContent = state.live ? 'Live TMDB metadata.' : 'Offline sample dataset; live ratings and financial values are not filled with fabricated values.'; return; }
-    body.innerHTML = list.map(m => `<tr><td>${esc(m.title)}</td><td>${esc(m.industry || 'International')}</td><td>${esc(m.year || (m.release_date||'').slice(0,4) || '—')}</td><td>${esc(LANGUAGES[m.original_language] || m.original_language || '—')}</td><td>${esc((m.genre_names||[]).join(', ') || '—')}</td><td>${m.vote_average != null && Number(m.vote_average)>0 ? Number(m.vote_average).toFixed(1)+'/10' : '—'}</td></tr>`).join('');
-    $('#dataset-caption').textContent = state.live ? `${state.movies.length} records received from TMDB. Language-based industry labels are approximate.` : `${state.movies.length} curated offline sample titles. No live ratings or financial figures are claimed.`;
->>>>>>> origin/main
   }
   function exportCsv() {
     const columns = ['title','industry','release_date','original_language','genre_names','vote_average','budget','revenue','overview'];
@@ -267,7 +206,6 @@
     try {
       const response = await fetch(`/api/movie/${encodeURIComponent(id)}`); const movie = await response.json();
       if (!response.ok) throw new Error(movie.error || 'Movie details unavailable');
-<<<<<<< HEAD
       const poster = movie.poster_url || ('');
       const year = movie.year || (movie.release_date || '').slice(0,4) || '—';
       const rating = movie.vote_average != null && Number(movie.vote_average)>0 ? Number(movie.vote_average).toFixed(1)+'/10' : 'Not reported';
@@ -279,15 +217,6 @@
       if (!movie) { content.innerHTML = `<div style="padding:30px"><h3>Could not load details</h3><p class="muted">${esc(error.message)}</p></div>`; return; }
       content.innerHTML = `<div class="modal-layout"><div>${movie.poster_url ? `<img class="modal-poster" src="${esc(movie.poster_url)}" alt="${esc(movie.title)} poster">` : `<div class="modal-poster poster-fallback">${fallbackPoster(movie)}</div>`}</div><div class="modal-main"><p class="eyebrow">SAVED OFFLINE RECORD</p><h2 class="modal-title" id="modal-title">${esc(movie.title)}</h2><p class="modal-overview">${esc(movie.overview || 'Synopsis not available in the saved record.')}</p><div class="genre-pills">${(movie.genre_names || []).map((genre) => `<span class="genre-pill">${esc(genre)}</span>`).join('')}</div><p class="muted small">This is a saved catalogue summary. Reconnect for full movie details and any newly available provider data.</p></div></div>`;
     }
-=======
-      const poster = movie.poster_url || (movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : '');
-      const year = movie.year || (movie.release_date || '').slice(0,4) || '—';
-      const rating = movie.vote_average != null && Number(movie.vote_average)>0 ? Number(movie.vote_average).toFixed(1)+'/10' : 'Not reported';
-      const roi = Number(movie.budget)>0 && Number(movie.revenue)>0 ? (((Number(movie.revenue)-Number(movie.budget))/Number(movie.budget))*100).toFixed(1)+'%' : 'Not available';
-      content.innerHTML = `<div class="modal-layout"><div>${poster ? `<img class="modal-poster" src="${esc(poster)}" alt="${esc(movie.title)} poster">` : `<div class="modal-poster poster-fallback">${fallbackPoster(movie)}</div>`}<p style="margin:10px 0 0"><span class="live-tag">${movie.live ? 'LIVE TMDB' : 'SAMPLE RECORD'}</span></p></div><div class="modal-main"><p class="eyebrow">${esc(movie.industry || 'CINEMA')} · ${esc(year)}</p><h2 class="modal-title" id="modal-title">${esc(movie.title)}</h2>${movie.tagline ? `<p style="color:var(--accent);font-style:italic">${esc(movie.tagline)}</p>` : ''}<p class="modal-overview">${esc(movie.overview || 'Synopsis not available.')}</p><div class="genre-pills">${(movie.genre_names||[]).map(g=>`<span class="genre-pill">${esc(g)}</span>`).join('')}</div><div class="modal-facts"><div class="modal-fact"><span>RATING</span><strong>${esc(rating)}</strong></div><div class="modal-fact"><span>RUNTIME</span><strong>${movie.runtime ? esc(movie.runtime+' min') : '—'}</strong></div><div class="modal-fact"><span>BUDGET</span><strong>${fmtMoney(movie.budget)}</strong></div><div class="modal-fact"><span>REVENUE</span><strong>${fmtMoney(movie.revenue)}</strong></div><div class="modal-fact"><span>PROFIT (REPORTED)</span><strong>${Number(movie.budget)>0&&Number(movie.revenue)>0 ? fmtMoney(Number(movie.revenue)-Number(movie.budget)) : '—'}</strong></div><div class="modal-fact"><span>SIMPLE ROI</span><strong>${roi}</strong></div></div><p class="muted small">${movie.live ? 'Live metadata from TMDB; budget and revenue may be missing or incomplete.' : 'Offline sample record. No financial figures or ratings have been fabricated.'}</p><button class="button button-primary" id="modal-recommend">Find similar movies ↗</button></div></div>`;
-      $('#modal-recommend').addEventListener('click', () => { $('#movie-modal').classList.add('hidden'); document.body.style.overflow=''; activateView('recommendations'); populateRecommendationSelect(); if ([...$('#recommend-source').options].some(o=>o.value===String(movie.id))) $('#recommend-source').value=String(movie.id); runRecommendations(); });
-    } catch (error) { content.innerHTML = `<div style="padding:30px"><h3>Could not load details</h3><p class="muted">${esc(error.message)}</p></div>`; }
->>>>>>> origin/main
   }
   function closeModal() { $('#movie-modal').classList.add('hidden'); document.body.style.overflow=''; }
 
@@ -306,7 +235,6 @@
   $('#movie-modal').addEventListener('click', (e) => { if (e.target === $('#movie-modal')) closeModal(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
   $('#current-year').textContent = new Date().getFullYear();
-<<<<<<< HEAD
 
   // Progressive Web App: connection state, installation and safe update activation.
   let deferredInstallPrompt = null;
@@ -361,7 +289,5 @@
     if (waitingWorker) waitingWorker.postMessage({ type: 'SKIP_WAITING' });
   });
 
-=======
->>>>>>> origin/main
   fetchStatus(); fetchMovies();
 })();

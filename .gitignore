@@ -33,10 +33,6 @@ Desktop.ini
 .idea/
 .vscode/*.log
 .vscode/*.tmp
-<<<<<<< HEAD
-
 # Large movie dataset files are downloaded locally; do not push 500MB+ assets to GitHub.
 data/raw/
 data/movies.sqlite3
-=======
->>>>>>> origin/main

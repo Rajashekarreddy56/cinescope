@@ -167,7 +167,9 @@ def offline_movies(industry: str, category: str, query: str = "") -> list[dict[s
     return movies
 
 
-DATASET_FILE = os.path.join(BASE_DIR, "data", "movies.sqlite3")
+DATASET_FILE = os.environ.get("CINESCOPE_DATASET_PATH", "").strip() or os.path.join(
+    BASE_DIR, "data", "movies.sqlite3"
+)
 PAGE_SIZE = 40
 RECOMMENDATION_LIMIT = 12
 RECOMMENDATION_CANDIDATE_LIMIT = 6000
@@ -537,5 +539,12 @@ def health():
     return jsonify({"ok": True})
 
 
+@app.errorhandler(500)
+def internal_server_error(_error):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Internal server error"}), 500
+    return "Internal server error", 500
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")), debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")), debug=False)

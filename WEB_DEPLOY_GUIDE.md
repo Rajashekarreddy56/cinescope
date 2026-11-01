@@ -1,71 +1,51 @@
-<<<<<<< HEAD
-# CineScope deployment notes
+# Deploy CineScope to Render
 
-1. Install dependencies: `pip install -r requirements-web.txt`.
-2. Download/import the dataset before deployment: `python scripts/download_dataset.py`.
-3. The resulting `data/movies.sqlite3` is intentionally excluded from Git because it is a large generated data asset. Provide it to the host through a release asset, object storage, or a host build step with sufficient disk and build time.
-4. Start command: `gunicorn webapp:app`.
-5. Serve over HTTPS for PWA installation.
+## Render Web Service settings
 
-Do not commit `.env`, credentials, or the raw 500+ MB source CSV. Verify dataset licensing and host storage limits before public deployment.
-=======
-# CineScope Website: run locally and publish online
+The existing `render.yaml` defines a **Free** Python Web Service. Connect the GitHub repository containing this project (the repository root is this folder), then use the Blueprint configuration or enter:
 
-This Flask website is separate from the Streamlit analysis dashboard. It includes a movie-discovery frontend, Tollywood/Bollywood/Hollywood filters, search, recommendations, dataset export, and a box-office view. The live data layer uses TMDB's API; it does not invent missing ratings, budgets, or revenue.
+| Setting | Value |
+| --- | --- |
+| Root Directory | Leave blank |
+| Build Command | `pip install -r requirements-web.txt` |
+| Start Command | `gunicorn --bind 0.0.0.0:$PORT webapp:app` |
+| Instance Type | Free |
+| Health Check Path | `/health` |
 
-## 1. Enable live data
+`webapp.py` exports the Flask object as `app`; the explicit `:app` selects it for Gunicorn. The requested shorthand `gunicorn webapp` does not select that object and does not bind to Render's `$PORT`, so use the working command above. Render sets `PORT` for the service. Debug mode is disabled.
 
-1. Create/sign in to a TMDB account at https://www.themoviedb.org/.
-2. Open account Settings → API and request developer API access. TMDB documents the process at https://developer.themoviedb.org/docs/authentication-application.
-3. Copy the **API Read Access Token** (Bearer token).
-4. In the project root, copy `.env.example` to `.env` and replace the placeholder:
+The service needs no API credentials for the local catalogue. `TRAKT_CLIENT_ID` in `.env.example` is an optional template value and must never be committed with a real credential. Do not configure unused TMDB credentials.
 
-   ```dotenv
-   TMDB_BEARER_TOKEN=your_actual_api_read_access_token
+## Full SQLite catalogue on the Free plan
+
+The local database is `data/movies.sqlite3`. It is 125,554,688 bytes (about 119.74 MiB), exceeds GitHub's 100 MB per-file limit, and is intentionally ignored by Git. The 128,596,378-byte source CSV is also excluded. Do not add either file to Git or assume a Render Free service has persistent disk storage.
+
+Without a separately supplied database, Render can start the app and answer health checks, but the catalogue APIs use the built-in offline sample rather than the 215,288-record catalogue. To deploy the actual dataset:
+
+1. Put the existing `movies.sqlite3` file in private object storage or another trusted HTTPS artifact store. Do not regenerate or replace it with sample records. Ensure the provider allows the Render build to download the file.
+2. In Render's Environment settings, add `CINESCOPE_DATASET_URL` as a secret containing a valid HTTPS download URL (a short-lived signed URL is suitable). Never put the URL or its access token in Git.
+3. Keep the Render **Build Command** as `pip install -r requirements-web.txt` for a sample-data deployment. To package the real dataset into each deployment, change it to:
+
+   ```sh
+   pip install -r requirements-web.txt && python scripts/prepare_render_dataset.py
    ```
 
-   Keep `.env` private; never push the token to GitHub or paste it into a public issue. A TMDB v3 API key can alternatively be provided as `TMDB_API_KEY`.
+   The helper downloads to `data/movies.sqlite3`, validates SQLite integrity and the `movies` table, and installs atomically. It refuses to overwrite an existing dataset and does not log the signed URL. It uses only Python's standard library.
+4. Deploy and verify `/health`, `/api/status` (`dataset_records` should be `215288` for this snapshot), and movie search. The build downloads the artifact again on future deployments. Runtime-written files on a Free instance are ephemeral; do not rely on them surviving restarts or redeploys.
 
-5. Launch the site with `run_web_windows.bat` (Windows) or manually:
+`CINESCOPE_DATASET_PATH` can optionally point the app to a different absolute database path. SQLite connections use read-only mode. The normal local database path remains `data/movies.sqlite3`.
 
-   ```bash
-   python -m venv .venv-web
-   # Windows: .venv-web\\Scripts\\activate
-   # macOS/Linux: source .venv-web/bin/activate
-   pip install -r requirements-web.txt
-   python webapp.py
-   ```
+## Local checks and operation
 
-6. Open http://127.0.0.1:5000. The site requests current TMDB metadata and caches successful API responses for ten minutes; use **Refresh data** to bypass the cache.
+From the project root:
 
-If you haven't obtained credentials yet, the website still runs with a curated offline sample across Telugu, Hindi and English-language cinema. It clearly labels sample mode, and does not fabricate numerical financial values.
+```powershell
+py -m pip install -r requirements-web.txt
+py webapp.py
+```
 
-## 2. Publish on the internet (Render)
+The local dataset installer is `py scripts/download_dataset.py`; it downloads the source CSV and builds the SQLite catalogue. Do not run that installer on Render when deploying a prebuilt SQLite artifact.
 
-A local address such as `127.0.0.1:5000` is visible only on your own computer. To open the site from another device or have a search engine discover it, deploy it to a public host.
+The application includes `/robots.txt` and `/sitemap.xml`. After deployment, submit the public sitemap URL in Google Search Console if search indexing is desired; indexing is not immediate or guaranteed. Serve the site over HTTPS for PWA installation.
 
-1. Create a GitHub repository and upload this project folder. Do not upload `.env`; `.gitignore` excludes it.
-2. In Render, create a new **Web Service** and connect that repository (or use the included `render.yaml` Blueprint).
-3. Use build command `pip install -r requirements-web.txt` and start command `gunicorn webapp:app`.
-4. In the host's Environment settings, add `TMDB_BEARER_TOKEN` with your token as a secret; do not commit credentials in code.
-5. Deploy. Render gives the service a public `onrender.com` URL. Open that URL and test search, industry filters, details, recommendations, and box-office tab.
-
-Official reference: https://render.com/docs/deploy-flask
-
-## 3. Make it show up when people search Google
-
-Deployment creates a public URL; it does **not** instantly guarantee that the site appears in Google results. This project includes a title, description, Open Graph tags, `/robots.txt`, and `/sitemap.xml`. After deployment:
-
-1. Replace absolute sitemap URLs with your final public domain if you later add a custom domain (the current sitemap returns a relative root URL for host independence; Google Search Console may require a full absolute sitemap URL).
-2. Add the public URL to Google Search Console and verify ownership.
-3. Submit the sitemap, inspect the home page URL, and request indexing. Indexing can take time and is not guaranteed.
-
-Google guide: https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
-
-## Data and academic accuracy
-
-- “Real-time” here means the website fetches current movie metadata from TMDB when requested, with a ten-minute application cache. It is not a real-time cinema ticket-sales feed.
-- Industry labels are inferred mainly from original language: Telugu → Tollywood, Hindi → Bollywood, English + US origin → Hollywood. This is a useful project filter, not an authoritative industry-credit database; dubbed releases and co-productions can cross these categories.
-- TMDB budget/revenue values may be missing, incomplete, expressed in USD, and are not audited box-office returns. ROI is calculated as `(revenue - budget) / budget * 100`; it excludes marketing, distribution, taxes and other costs.
-- The site contains the required attribution: “This product uses the TMDB API but is not endorsed or certified by TMDB.” See TMDB's API documentation and terms before public/commercial use.
->>>>>>> origin/main
+Never commit `.env`, credentials, signed artifact URLs, or dataset files. Confirm the upstream dataset's current licence and attribution requirements before redistribution.
