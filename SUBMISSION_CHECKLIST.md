@@ -22,6 +22,7 @@ Offline catalogue titles are demonstration records. Ratings and posters are left
 - Capture screenshots of the homepage, each industry filter, recommendations, dataset explorer, and box-office analysis.
 - Explain ROI: `(Revenue - Budget) / Budget × 100`. Note that this simple ratio excludes marketing, distribution shares, taxes, and other costs.
 - Describe the current offline version honestly: it does not fetch new titles automatically.
+<<<<<<< HEAD
 
 
 ## PWA verification
@@ -35,3 +36,5 @@ Offline catalogue titles are demonstration records. Ratings and posters are left
 - [ ] Confirm uncached requests show a clear unavailable state rather than invented content.
 - [ ] Restore connectivity and confirm the online indicator returns and data can refresh.
 - [ ] Deploy a new version and verify the update prompt activates the waiting worker.
+=======
+>>>>>>> origin/main
