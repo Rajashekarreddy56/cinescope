@@ -7,7 +7,7 @@ The existing `render.yaml` defines a **Free** Python Web Service. Connect the Gi
 | Setting | Value |
 | --- | --- |
 | Root Directory | Leave blank |
-| Build Command | `pip install -r requirements-web.txt` |
+| Build Command | `pip install -r requirements-web.txt && python scripts/prepare_render_dataset.py` |
 | Start Command | `gunicorn --bind 0.0.0.0:$PORT webapp:app` |
 | Instance Type | Free |
 | Health Check Path | `/health` |
@@ -20,20 +20,15 @@ The service needs no API credentials for the local catalogue. `TRAKT_CLIENT_ID` 
 
 The local database is `data/movies.sqlite3`. It is 125,554,688 bytes (about 119.74 MiB), exceeds GitHub's 100 MB per-file limit, and is intentionally ignored by Git. The 128,596,378-byte source CSV is also excluded. Do not add either file to Git or assume a Render Free service has persistent disk storage.
 
-Without a separately supplied database, Render can start the app and answer health checks, but the catalogue APIs use the built-in offline sample rather than the 215,288-record catalogue. To deploy the actual dataset:
+The build command downloads the existing database from the public GitHub Release asset at `https://github.com/Rajashekarreddy56/cinescope/releases/download/v1.0/movies.sqlite3`. The helper saves it as `data/movies.sqlite3`, verifies the configured SHA-256, checks SQLite integrity and the expected movie columns, and fails the build on download or validation errors. It skips downloading when a valid database already exists. A mismatched/corrupt existing file is replaced only after a complete download passes verification. No environment variable or credential is needed for this public release.
 
-1. Put the existing `movies.sqlite3` file in private object storage or another trusted HTTPS artifact store. Do not regenerate or replace it with sample records. Ensure the provider allows the Render build to download the file.
-2. In Render's Environment settings, add `CINESCOPE_DATASET_URL` as a secret containing a valid HTTPS download URL (a short-lived signed URL is suitable). Never put the URL or its access token in Git.
-3. Keep the Render **Build Command** as `pip install -r requirements-web.txt` for a sample-data deployment. To package the real dataset into each deployment, change it to:
+**Checksum action required:** the SHA-256 supplied for this deployment currently contains 63 hexadecimal characters, not the required 64. The existing database and downloaded Release asset both hash to `e733584b7ee7734ad9cc6aa4cad643e370eb1fc8aefc9a42c8ef637a2d16b1ea`, which does not match the supplied value. The helper deliberately retains the supplied value and stops with a clear error before downloading until the checksum is corrected and verified.
 
-   ```sh
-   pip install -r requirements-web.txt && python scripts/prepare_render_dataset.py
-   ```
+Render Free instances have ephemeral filesystems, not persistent disks. The dataset is therefore downloaded and verified on each fresh build/redeploy; the app does not create an empty database or fall back silently during build. `/health` performs a read-only query and returns HTTP 503 with `database_ready: false` if the database is missing, empty, or unreadable.
 
-   The helper downloads to `data/movies.sqlite3`, validates SQLite integrity and the `movies` table, and installs atomically. It refuses to overwrite an existing dataset and does not log the signed URL. It uses only Python's standard library.
-4. Deploy and verify `/health`, `/api/status` (`dataset_records` should be `215288` for this snapshot), and movie search. The build downloads the artifact again on future deployments. Runtime-written files on a Free instance are ephemeral; do not rely on them surviving restarts or redeploys.
+After deployment, verify `/health` returns `{"ok":true,"database_ready":true}` and `/api/status` reports `215288` records.
 
-`CINESCOPE_DATASET_PATH` can optionally point the app to a different absolute database path. SQLite connections use read-only mode. The normal local database path remains `data/movies.sqlite3`.
+`CINESCOPE_DATASET_PATH` can optionally point both the app and build helper to a different absolute database path. SQLite application connections use read-only mode. The default path is `data/movies.sqlite3`.
 
 ## Local checks and operation
 
@@ -44,7 +39,7 @@ py -m pip install -r requirements-web.txt
 py webapp.py
 ```
 
-The local dataset installer is `py scripts/download_dataset.py`; it downloads the source CSV and builds the SQLite catalogue. Do not run that installer on Render when deploying a prebuilt SQLite artifact.
+The local source-dataset installer is `py scripts/download_dataset.py`; it downloads the source CSV and builds the SQLite catalogue. Render uses `scripts/prepare_render_dataset.py` to fetch the prebuilt, checksum-pinned Release asset.
 
 The application includes `/robots.txt` and `/sitemap.xml`. After deployment, submit the public sitemap URL in Google Search Console if search indexing is desired; indexing is not immediate or guaranteed. Serve the site over HTTPS for PWA installation.
 

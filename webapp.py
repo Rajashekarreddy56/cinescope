@@ -536,7 +536,22 @@ def api_box_office():
 
 @app.get("/health")
 def health():
-    return jsonify({"ok": True})
+    if not os.path.isfile(DATASET_FILE):
+        return jsonify({"ok": False, "database_ready": False}), 503
+
+    try:
+        conn = sqlite3.connect(f"file:{DATASET_FILE}?mode=ro", uri=True, timeout=2)
+        try:
+            ready = conn.execute("SELECT 1 FROM movies LIMIT 1").fetchone() is not None
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        app.logger.exception("SQLite readiness check failed.")
+        return jsonify({"ok": False, "database_ready": False}), 503
+
+    if not ready:
+        return jsonify({"ok": False, "database_ready": False}), 503
+    return jsonify({"ok": True, "database_ready": True})
 
 
 @app.errorhandler(500)

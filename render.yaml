@@ -3,7 +3,7 @@ services:
     name: cine-scope-movie-analyzer
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements-web.txt
+    buildCommand: pip install -r requirements-web.txt && python scripts/prepare_render_dataset.py
     startCommand: "gunicorn --bind 0.0.0.0:$PORT webapp:app"
     healthCheckPath: /health
     envVars:
