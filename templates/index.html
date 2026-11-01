@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CineScope is a movie discovery and box office analysis project for Tollywood, Bollywood and Hollywood. Explore current movie metadata, ratings, budgets, revenue and recommendations.">
+  <meta name="theme-color" content="#080b13">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+  <link rel="canonical" href="{{ request.url_root }}">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"CineScope Movie & Box Office Analyzer","applicationCategory":"EntertainmentApplication","description":"Explore Tollywood, Bollywood and Hollywood movie metadata, recommendations and available box-office metrics."}</script>
+  <meta property="og:title" content="CineScope — Movie & Box Office Analyzer">
+  <meta property="og:description" content="Discover Tollywood, Bollywood and Hollywood movies. Compare available budget, revenue, ROI and movie recommendations.">
+  <meta property="og:type" content="website">
+  <title>CineScope — Movie & Box Office Analyzer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='23' fill='%23e8b45b'/%3E%3Ctext x='50' y='69' font-size='62' text-anchor='middle'%3E%E2%96%B6%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="CineScope home">
+        <span class="brand-mark">▶</span>
+        <span class="brand-copy"><strong>CineScope</strong><small>MOVIE INTELLIGENCE</small></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-view="discover">Discover</button>
+        <button class="nav-link" data-view="boxoffice">Box Office</button>
+        <button class="nav-link" data-view="recommendations">Recommendations</button>
+        <button class="nav-link" data-view="dataset">Movie Dataset</button>
+      </nav>
+      <div class="top-status"><span class="status-dot"></span><span id="data-status">Checking data source…</span></div>
+    </header>
+
+    <main>
+      <section class="hero" id="hero">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> YOUR CINEMA, DECODED</p>
+          <h1>Every movie has<br>a <em>story in the data.</em></h1>
+          <p class="hero-description">Explore what’s trending across Tollywood, Bollywood and Hollywood. Compare audience ratings, explore box-office numbers when available, and find your next watch.</p>
+          <div class="hero-actions"><button class="button button-primary" id="explore-button">Explore movies <span>↗</span></button><span class="hero-note"><span class="live-pulse"></span> Large downloadable movie dataset · offline ready</span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="orb orb-one"></div><div class="orb orb-two"></div>
+          <div class="ticket ticket-back"><span>NOW SHOWING</span><b>DATA</b><small>BOX OFFICE / 2026</small></div>
+          <div class="ticket ticket-front"><div class="ticket-top"><span>CS / 01</span><span>★ ★ ★</span></div><div class="ticket-play">▶</div><strong>THE<br>BIG SCREEN</strong><div class="ticket-bottom"><span>GENRE</span><span>RATINGS</span><span>ROI</span></div></div>
+          <div class="hero-stat stat-top"><span class="stat-star">✦</span><span>4 cinema worlds</span></div>
+          <div class="hero-stat stat-bottom"><span class="stat-bars">▂ ▅ ▇</span><span>Insights beyond the screen</span></div>
+        </div>
+      </section>
+
+      <div id="connection-banner" class="connection-banner" role="status" aria-live="polite"><span class="connection-indicator"></span><span id="connection-message">Checking connection…</span><button class="pwa-install hidden" id="install-app" type="button">Install app</button><button id="update-app" class="hidden" type="button">Update now</button></div>
+      <div id="global-notice" class="notice hidden" role="status"></div>
+
+      <section class="toolbar" aria-label="Movie filters">
+        <div class="industry-switch" role="group" aria-label="Movie industry">
+          <button class="industry-chip active" data-industry="all">All industries</button>
+          <button class="industry-chip" data-industry="tollywood"><span class="chip-dot tollywood-dot"></span>Tollywood</button>
+          <button class="industry-chip" data-industry="bollywood"><span class="chip-dot bollywood-dot"></span>Bollywood</button>
+          <button class="industry-chip" data-industry="hollywood"><span class="chip-dot hollywood-dot"></span>Hollywood</button>
+        </div>
+        <form class="search-form" id="search-form" role="search">
+          <span class="search-icon">⌕</span><input id="search-input" type="search" placeholder="Search movies, genres…" aria-label="Search movies"><button type="submit" aria-label="Search">Search</button>
+        </form>
+      </section>
+
+      <section class="view-section" id="discover-view">
+        <div class="section-heading">
+          <div><p class="eyebrow">THE MOVIE BOARD</p><h2>Find your next <em>favourite.</em></h2><p class="section-subtitle" id="section-subtitle">Popular titles across the world of cinema.</p></div>
+          <div class="category-switch" role="group" aria-label="Movie category">
+            <button class="category-chip active" data-category="popular">Popular</button><button class="category-chip" data-category="now-playing">Recently released</button><button class="category-chip" data-category="top-rated">Top rated</button><button class="category-chip" data-category="upcoming">Upcoming</button>
+          </div>
+        </div>
+        <div class="stat-grid" id="stat-grid">
+          <article class="stat-card"><span class="stat-label">TITLES FOUND</span><div class="stat-value" id="stat-count">—</div><span class="stat-foot">In this selection</span></article>
+          <article class="stat-card"><span class="stat-label">AVERAGE RATING</span><div class="stat-value" id="stat-rating">—</div><span class="stat-foot">Dataset audience score</span></article>
+          <article class="stat-card"><span class="stat-label">INDUSTRIES</span><div class="stat-value">03</div><span class="stat-foot">Telugu · Hindi · English*</span></article>
+          <article class="stat-card stat-card-accent"><span class="stat-label">BOX OFFICE DATA</span><div class="stat-value" id="stat-boxoffice">On demand</div><span class="stat-foot">Available when reported</span></article>
+        </div>
+        <div class="results-heading"><div><h3 id="results-title">Popular movies</h3><span class="results-count" id="results-count">Loading titles…</span></div><button class="text-button" id="refresh-button">↻ Refresh data</button></div>
+        <div id="movie-grid" class="movie-grid" aria-live="polite"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div>
+        <div class="empty-state hidden" id="empty-state"><div class="empty-icon">⌕</div><h3>No movies found</h3><p>Try a different title or switch industries.</p></div>
+        <div class="pagination-row"><button class="button button-outline hidden" id="load-more">Load more movies <span>↓</span></button></div>
+      </section>
+
+      <section class="view-section hidden" id="boxoffice-view">
+        <div class="section-heading"><div><p class="eyebrow">THE NUMBERS BEHIND THE MOVIES</p><h2>Box office <em>breakdown.</em></h2><p class="section-subtitle">Compare budget, revenue, profit and ROI. Financial data is displayed only when supplied by a verified, licensed source. Budget and revenue are analysed only when supplied by the source dataset.</p></div><div class="category-switch"><button class="category-chip active" id="box-refresh">↻ Refresh numbers</button></div></div>
+        <div class="boxoffice-note" id="boxoffice-note">Loading available box-office figures…</div>
+        <div class="stat-grid box-stats"><article class="stat-card"><span class="stat-label">MOVIES WITH FINANCIAL DATA</span><div class="stat-value" id="box-count">—</div><span class="stat-foot">Current selection</span></article><article class="stat-card"><span class="stat-label">TOTAL REPORTED REVENUE</span><div class="stat-value" id="box-revenue">—</div><span class="stat-foot">As listed by data provider</span></article><article class="stat-card"><span class="stat-label">HIGHEST REPORTED REVENUE</span><div class="stat-value" id="box-top">—</div><span class="stat-foot" id="box-top-title">Among loaded titles</span></article><article class="stat-card stat-card-accent"><span class="stat-label">ROI</span><div class="stat-value" id="box-roi">—</div><span class="stat-foot">Revenue minus budget, divided by budget</span></article></div>
+        <div class="panel"><div class="panel-heading"><div><h3>Budget vs. revenue</h3><p>Offline mode: illustrative synthetic examples. Live mode: provider figures where available.</p></div><span class="panel-tag">USD · Demo examples / provider data</span></div><div id="box-chart" class="box-chart"></div></div>
+        <div class="panel table-panel"><div class="panel-heading"><div><h3>Financial data table</h3><p>Offline financial figures are synthetic demo values, not factual estimates.</p></div></div><div class="table-scroll"><table><thead><tr><th>Movie</th><th>Industry</th><th>Budget</th><th>Revenue</th><th>Profit</th><th>ROI</th></tr></thead><tbody id="box-table-body"><tr><td colspan="6">Loading…</td></tr></tbody></table></div></div>
+      </section>
+
+      <section class="view-section hidden" id="recommendations-view">
+        <div class="section-heading"><div><p class="eyebrow">MADE FOR YOUR NEXT MOVIE NIGHT</p><h2>Find something <em>similar.</em></h2><p class="section-subtitle">Get offline recommendations matched by genre, story, language and industry from the local movie dataset.</p></div></div>
+        <div class="recommend-layout"><div class="recommend-picker panel"><label for="recommend-source">Choose a movie</label><select id="recommend-source"><option value="">Load movies first…</option></select><button class="button button-primary" id="recommend-button">Find recommendations <span>↗</span></button><p class="muted small">Matches are ranked for the selected movie using its local metadata.</p></div><div class="recommend-results"><div class="results-heading"><div><h3>Picked for you</h3><span class="results-count" id="recommend-count">Choose a movie to begin</span></div></div><div id="recommend-grid" class="movie-grid recommendation-grid"></div></div></div>
+      </section>
+
+      <section class="view-section hidden" id="dataset-view">
+        <div class="section-heading"><div><p class="eyebrow">A CLEAN LOOK AT THE DATA</p><h2>Movie <em>dataset.</em></h2><p class="section-subtitle">Browse records currently loaded into the application, search them, or export a CSV of the current movie list.</p></div><button class="button button-outline" id="export-csv">↓ Export CSV</button></div>
+        <div class="panel table-panel"><div class="panel-heading"><div><h3>Loaded movie records</h3><p id="dataset-caption">Live metadata or labelled offline sample records.</p></div><input class="table-search" type="search" id="table-search" placeholder="Filter this table…" aria-label="Filter dataset"></div><div class="table-scroll"><table><thead><tr><th>Title</th><th>Industry</th><th>Year</th><th>Language</th><th>Genre</th><th>Rating</th></tr></thead><tbody id="dataset-table-body"><tr><td colspan="6">Loading…</td></tr></tbody></table></div></div>
+      </section>
+
+      <section class="method-strip"><div class="method-icon">✳</div><div><p class="eyebrow">HOW IT WORKS</p><h3>From movie metadata to meaningful insights.</h3><p>Discover movies, compare available numbers, explore recommendations and understand where the data came from.</p></div><div class="method-steps"><span><b>01</b> Discover</span><span><b>02</b> Analyze</span><span><b>03</b> Recommend</span></div></section>
+    </main>
+
+    <footer class="footer"><a class="brand footer-brand" href="/"><span class="brand-mark">▶</span><span class="brand-copy"><strong>CineScope</strong><small>MOVIE INTELLIGENCE</small></span></a><p>Academic project · Movie Recommendation &amp; Box Office Analyzer</p><p class="tmdb-disclaimer">Movie metadata is loaded from a downloadable dataset. Industry labels are language-based estimates; financial values may be incomplete. See DATASET_SOURCES.md for provenance and licence notes.</p><span class="footer-year">© <span id="current-year"></span> CineScope</span></footer>
+  </div>
+
+  <div class="modal-overlay hidden" id="movie-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="movie-modal"><button class="modal-close" id="modal-close" aria-label="Close details">×</button><div id="modal-content"><div class="skeleton-card"></div></div></div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+</body>
+</html>

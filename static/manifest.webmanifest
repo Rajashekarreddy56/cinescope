@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "CineScope — Movie Intelligence",
+  "short_name": "CineScope",
+  "description": "Discover movies, explore recommendations and analyze available box-office data.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080b13",
+  "theme_color": "#080b13",
+  "categories": ["entertainment", "education"],
+  "icons": [
+    {"src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
